@@ -1,8 +1,9 @@
-Онлайн редактор кода:
+ГЋГ­Г«Г Г©Г­ Г°ГҐГ¤Г ГЄГІГ®Г° ГЄГ®Г¤Г :
 https://phaser.io/sandbox
 
-Уроки:
+Г“Г°Г®ГЄГЁ:
 http://www.lessmilk.com/tutorial/2d-platformer-phaser
+http://www.lessmilk.com/game/dark-blue/
 https://gamedevacademy.org/how-to-make-a-mario-style-platformer-with-phaser-3/
 https://www.emanueleferonato.com/2018/05/03/the-basics-behind-jumping-on-enemies-feature-explained-with-phaser-and-arcade-physics-updated-to-phaser-3/
 https://www.emanueleferonato.com/2018/04/28/super-mario-who-html5-platformer-prototype-inspired-by-ios-hit-yeah-bunny-thanks-to-phaser-and-arcade-physics-updated-to-phaser-3-6-0/
