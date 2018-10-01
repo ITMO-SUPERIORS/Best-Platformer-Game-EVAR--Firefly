@@ -1,7 +1,7 @@
-Îíëàéí ðåäàêòîð êîäà:
+Online Phaser Code Editor:
 https://phaser.io/sandbox
 
-Óðîêè:
+Tutorials:
 http://www.lessmilk.com/tutorial/2d-platformer-phaser
 http://www.lessmilk.com/game/dark-blue/
 https://gamedevacademy.org/how-to-make-a-mario-style-platformer-with-phaser-3/
