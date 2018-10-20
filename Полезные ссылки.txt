@@ -1,6 +1,11 @@
 Online Phaser Code Editor:
 https://phaser.io/sandbox
 
+Starting instructions:
+https://phaser.io/download/stable
+https://phaser.io/tutorials/getting-started-phaser3
+https://phaser.io/tutorials/making-your-first-phaser-3-game
+
 Tutorials:
 http://www.lessmilk.com/tutorial/2d-platformer-phaser
 http://www.lessmilk.com/game/dark-blue/
