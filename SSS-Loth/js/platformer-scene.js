@@ -69,7 +69,7 @@ export default class PlatformerScene extends Phaser.Scene {
 
     this.physics.world.addCollider(this.enemy, this.groundLayer);
 
-    this.enemy.setVelocityX(400);
+    this.enemy.setVelocityX(200);
 
     /* //картинка фрукта, используемая, как тайл
     const fruitTiles = map.addTilesetImage('fruit');
@@ -132,33 +132,19 @@ export default class PlatformerScene extends Phaser.Scene {
       });
     }
 
-    /* if(this.enemy.blocked(right)){
-      this.enemy.setflipX(false);
-      this.enemy.setVelocityX(-400);
+    //Противник касается стены справа
+    if(this.enemy.body.blocked.right){
+      //Разворот спрайта горизонтально
+      //this.enemy.setFlipX(true);
+      this.enemy.setVelocityX(-200);
     }
-    else if(this.enemy.blocked(left)){
-      this.enemy.setflipX(true);
-      this.enemy.setVelocityX(400);
-    } */
 
-
-    //Столкновение противника и стен уровня
-    this.physics.world.collide(this.enemy, this.groundLayer, function(enemy, groundLayer){
-      
-      //Противник касается стены справа
-      if(this.enemy.blocked.right){
-          //Разворот спрайта горизонтально
-          this.enemy.setFlipX(true);
-          this.enemy.setVelocityX(-400);
-      }
-
-      //Противник касается стены слева
-      if(this.enemy.blocked.left){
-          //Отменить разворот спрайта горизонтально
-          this.enemy.setFlipX(false);
-          this.enemy.setVelocityX(400);
-      }
-    }, null, this);
+    //Противник касается стены слева
+    if(this.enemy.body.blocked.left){
+        //Отменить разворот спрайта горизонтально
+        //this.enemy.setFlipX(false);
+        this.enemy.setVelocityX(200);
+    }
   }
 
   /* function collectFruit(sprite, tile) {
