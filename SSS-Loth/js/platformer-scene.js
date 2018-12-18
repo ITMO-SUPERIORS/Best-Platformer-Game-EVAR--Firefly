@@ -17,13 +17,14 @@ export default class PlatformerScene extends Phaser.Scene {
     this.load.tilemapTiledJSON("map", "../assets/tilemaps/platformer.json");
     this.load.image("sky", "assets/images/sky.png");
     this.load.image("fruit", "assets/images/fruit.png");
+    this.load.image("fruit1", "assets/images/fruit1.png");
     this.load.image("enemy", "assets/images/enemy.png");
   }
 
   create() {
     this.isPlayerDead = false;
 
-    const score = 0;
+    const fruit_score = 0;
 
     const map = this.make.tilemap({ key: "map" });
     const tiles = map.addTilesetImage("0x72-industrial-tileset-32px-extruded", "tiles");
@@ -57,9 +58,25 @@ export default class PlatformerScene extends Phaser.Scene {
         //На тайл карте расставлены шипы, развёрнутые в разные стороны, поэтому повернём спрайт нужной стороной
         //при расстановке новых спрайтов шипов/лавы
         spike.rotation = tile.rotation;
-        if (spike.angle === 0) spike.body.setSize(32, 6).setOffset(0, 26);
-        else if (spike.angle === -90) spike.body.setSize(6, 32).setOffset(26, 0);
-        else if (spike.angle === 90) spike.body.setSize(6, 32).setOffset(0, 0);
+        if (spike.angle === 0) spike.body.setSize(32, 6).setOffset(0, 12);
+        else if (spike.angle === -90) spike.body.setSize(6, 32).setOffset(12, 0);
+        else if (spike.angle === 90) spike.body.setSize(6, 32).setOffset(12, 0);
+
+        this.groundLayer.removeTileAt(tile.x, tile.y);
+      }
+    });
+
+    //На карте расставлены шипы. Шип - это только маленькая часть тайла, поэтому, если назначить физику
+    //столкновения на шипы, то игрок будет взаимодействовать с ними, находясь над шипами. Поэтому просто
+    //заменим тайлы шипов на спрайт шипов/лавы, благодаря чему изменим их размер на подходящий для взаимодействия
+    this.fruitGroup = this.physics.add.staticGroup();
+    this.groundLayer.forEachTile(tile => {
+      if (tile.index === 8) {
+        const fruit = this.fruitGroup.create(tile.getCenterX(), tile.getCenterY(), "fruit");
+
+        //На тайл карте расставлены шипы, развёрнутые в разные стороны, поэтому повернём спрайт нужной стороной
+        //при расстановке новых спрайтов шипов/лавы
+        fruit.rotation = tile.rotation;
 
         this.groundLayer.removeTileAt(tile.x, tile.y);
       }
@@ -70,15 +87,6 @@ export default class PlatformerScene extends Phaser.Scene {
     this.physics.world.addCollider(this.enemy, this.groundLayer);
 
     this.enemy.setVelocityX(200);
-
-    /* //картинка фрукта, используемая, как тайл
-    const fruitTiles = map.addTilesetImage('fruit');
-    //добавляем фрукты, как тайлы
-    fruitLayer = map.createDynamicLayer('Fruits', fruitTiles, 0, 0);
-    //индекс фрукта - 7
-    fruitLayer.setTileIndexCallback(7, collectFruit, this);
-    //когда игрок дотрагивается до фрукта, тайла с индексом 7, будет вызвана функция "collectFruit"
-    this.physics.add.overlap(player, fruitLayer); */
 
     this.cameras.main.startFollow(this.player.sprite);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -94,6 +102,7 @@ export default class PlatformerScene extends Phaser.Scene {
       .setScrollFactor(0);
 
       //Текстовое поле для отображения количества набранных очков/собранных фруктов
+      //Подсчёт количества фруктов
       let text_score = this.add
       .text(16, 550, "0", {
         font: "18px monospace",
@@ -110,6 +119,13 @@ export default class PlatformerScene extends Phaser.Scene {
 
     //Управление персонажем и его перемещение/движение
     this.player.update();
+
+    if (this.physics.world.overlap(this.player.sprite, this.fruitGroup)) {
+      //map.removeTile(x, y, this.groundLayer).destroy();
+      this.groundLayer.removeTileAt(getTileX(this.player.sprite.x), getTileY(this.player.sprite.y));
+      //fruit_score ++;
+      //text_score.setText(fruit_score);
+    }
 
     if (
       this.player.sprite.y > this.groundLayer.height ||
@@ -146,14 +162,4 @@ export default class PlatformerScene extends Phaser.Scene {
         this.enemy.setVelocityX(200);
     }
   }
-
-  /* function collectFruit(sprite, tile) {
-    //убираем тайл собранного фрукта с карты
-    fruitLayer.removeTileAt(tile.x, tile.y);
-    //увеличивает счётчик
-    score ++;
-    //меняем текст счёта
-    text_score.setText(score);
-    return false;
-  } */
 }
