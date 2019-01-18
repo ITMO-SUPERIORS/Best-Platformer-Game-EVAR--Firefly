@@ -1,0 +1,5 @@
+Sdeaf 100
+Vasya 80
+imGur 50
+Basstarda 10
+reacTor 10
