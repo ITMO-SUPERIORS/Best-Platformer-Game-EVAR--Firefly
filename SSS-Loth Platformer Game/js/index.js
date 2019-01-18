@@ -11,11 +11,11 @@ var MainMenu = new Phaser.Class ({
   },
   
   preload: function() {
-    this.load.image("TMNT", "./assets/images/TMNT.png");
+    this.load.image("Menu", "./assets/images/MainMenu.png");
   },
 
   create: function() {
-    this.add.sprite(400, 300, 'TMNT');
+    this.add.sprite(400, 300, 'Menu');
     
     let style = {
       font: "18px monospace",
@@ -26,7 +26,7 @@ var MainMenu = new Phaser.Class ({
     };
 
     //Текстовое поле с управлением персонажем
-    this.add.text(121, 181, "ГЛАВНОЕ МЕНЮ\nУПРАВЛЕНИЕ СТРЕЛКАМИ И/ИЛИ КНОПКАМИ WASD НА КЛАВИАТУРЕ\nЧТОБЫ НАЧАТЬ ИГРУ, НАЖМИТЕ КЛАВИШУ S-START", style).setScrollFactor(0);
+    // this.add.text(121, 181, "ГЛАВНОЕ МЕНЮ\nУПРАВЛЕНИЕ СТРЕЛКАМИ И/ИЛИ КНОПКАМИ WASD НА КЛАВИАТУРЕ\nЧТОБЫ НАЧАТЬ ИГРУ, НАЖМИТЕ КЛАВИШУ S-START", style).setScrollFactor(0);
 
     this.input.keyboard.on('keydown_S', function (event) {
       console.log('From MainMenu to PlatformerScene');
@@ -48,7 +48,9 @@ var PlatformerScene = new Phaser.Class ({
   preload: function() {
     this.load.image("coin", "./assets/images/fruit.png");
     this.load.image("player", "./assets/images/sprite.png");
-    // this.load.image("spike", "./assets/images/lava.png");
+    this.load.image("spike", "./assets/images/pike.png");
+    this.load.image("wave", "./assets/images/wave.png");
+    this.load.image("wave1", "./assets/images/wave1.png");
     this.load.image("tiles", "./assets/tilesets/TileSet-01.png");
     this.load.tilemapTiledJSON("map", "./assets/tilemaps/Platformer_2.json");
     this.load.image("sky", "./assets/images/Background.png");
@@ -56,6 +58,7 @@ var PlatformerScene = new Phaser.Class ({
     this.load.spritesheet("run_anim", "./assets/images/sloth_run_2.png", {frameWidth: 99, frameHeight: 105, spacing: 2});
     this.load.spritesheet("idle_anim", "./assets/images/sloth_idle_2.png", {frameWidth: 99, frameHeight: 105, spacing: 2});
     this.load.image("jump", "./assets/images/sloth_jump.png");
+    this.load.text("leaderboard", "./assets/leaderboard");
   },
 
   create: function() {
@@ -68,19 +71,31 @@ var PlatformerScene = new Phaser.Class ({
     // this.add.image(1000, 500, 'sky');
     // bg.height = this.height;
     // bg.width = this.width;
-    this.coin = this.physics.add.sprite(Phaser.Math.Between(300, 700), Phaser.Math.Between(100, 400), 'coin');
+    const spawnPoint = map.findObject("Objects", obj => obj.name === "Spawn Point");
 
     map.createDynamicLayer("Back", tiles);
-    this.groundLayer = map.createDynamicLayer("Solid", tiles);
-    this.obstacleLayer = map.createDynamicLayer("Obstacles", tiles);
     map.createDynamicLayer("Front", tiles);
+
+    this.coin = this.physics.add.sprite(
+      Phaser.Math.Between(spawnPoint.x - 450, spawnPoint.x + 450), 
+      Phaser.Math.Between(spawnPoint.y - 256, spawnPoint.y + 256), 'coin'
+    );
+
+    this.groundLayer = map.createDynamicLayer("Solid", tiles);
+    //this.obstacleLayer = map.createDynamicLayer("Obstacles", tiles);
+    
+    
+    
+
 
     //Поместить игрока в позицию объекта "Spawn Point", созданного в карте.
     //Персонаж сохранён не как переменная, а как часть сцены
-    const spawnPoint = map.findObject("Objects", obj => obj.name === "Spawn Point");
+    
     this.player = new Player(this, spawnPoint.x, spawnPoint.y);
     // this.player = new Player(this, 200, 400);
 
+    
+    
     //Установка столкновения/взаимодействия игрока и слоя уровня ("groundLayer") - берём sprite,
     //а не самого игрока, так как класс Игрока не является сам по себе спрайтом, то есть
     //не взаимодействует со слоем уровня
@@ -89,53 +104,69 @@ var PlatformerScene = new Phaser.Class ({
     this.physics.world.addCollider(this.coin, this.groundLayer);
     
 
-    this.obstacleLayer.setCollisionByProperty({ isSpike: true });
-    this.physics.world.addCollider(this.player.sprite, this.obstacleLayer);
+    //this.obstacleLayer.setCollisionByProperty({ collides: true });
+    //this.physics.world.addCollider(this.player.sprite, this.obstacleLayer);
 
-    this.spikes = this.physics.add.staticGroup();
+    //this.spikes = this.physics.add.staticGroup();
     
-    this.obstacleLayer.forEachTile(tile => {
-      if (tile.index === 378 || tile.index === 247 || tile.index === 248){
+    /* this.obstacleLayer.forEachTile(tile => {
+      if (tile.index === 377 || tile.index === 247 || tile.index === 248){
         this.spikes.create(tile);
       }
-    })
+    }) */
     
     //На карте расставлены шипы. Шип - это только маленькая часть тайла, поэтому, если назначить физику
     //столкновения на шипы, то игрок будет взаимодействовать с ними, находясь над шипами. Поэтому просто
     //заменим тайлы шипов на спрайт шипов/лавы, благодаря чему изменим их размер на подходящий для взаимодействия
     // var spikeTiles = []
-    // this.spikeGroup = this.physics.add.staticGroup();
-    //   this.obstacleLayer.forEachTile(tile => {
-    //   if (tile.index === 377 || tile.index === 378) {
-    //     const spike = this.spikeGroup.create(tile.getCenterX(), tile.getCenterY());
+    this.spikeGroup = this.physics.add.staticGroup();
+      this.groundLayer.forEachTile(tile => {
+      if (tile.index === 378) {
+        const spike = this.spikeGroup.create(tile.getCenterX(), tile.getCenterY(), "spike");
 
-    // //     //На тайл карте расставлены шипы, развёрнутые в разные стороны, поэтому повернём спрайт нужной стороной
-    // //     //при расстановке новых спрайтов шипов/лавы
-    // //     spike.rotation = tile.rotation;
-    // //     if (spike.angle === 0) spike.body.setSize(32, 6).setOffset(0, 12);
-    // //     else if (spike.angle === -90) spike.body.setSize(6, 32).setOffset(12, 0);
-    // //     else if (spike.angle === 90) spike.body.setSize(6, 32).setOffset(12, 0);
+         //На тайл карте расставлены шипы, развёрнутые в разные стороны, поэтому повернём спрайт нужной стороной
+         //при расстановке новых спрайтов шипов/лавы
+         spike.rotation = tile.rotation;
+         if (spike.angle === 0) spike.body.setSize(32, 6).setOffset(0, 12);
+         else if (spike.angle === -90) spike.body.setSize(6, 32).setOffset(12, 0);
+         else if (spike.angle === 90) spike.body.setSize(6, 32).setOffset(12, 0);
 
-    // //     this.groundLayer.removeTileAt(tile.x, tile.y);
-    //   }
-    // });
+         this.groundLayer.removeTileAt(tile.x, tile.y);
+      }
 
-    this.enemy = this.physics.add.sprite(350, 490, "enemy");
+      if (tile.index === 248) {
+        const spike = this.spikeGroup.create(tile.getCenterX(), tile.getCenterY(), "wave");
+         this.groundLayer.removeTileAt(tile.x, tile.y);
+      }
+
+      if (tile.index === 249) {
+        const spike = this.spikeGroup.create(tile.getCenterX(), tile.getCenterY(), "wave1");
+         this.groundLayer.removeTileAt(tile.x, tile.y);
+      }
+    });
+
+    this.enemy = this.physics.add.sprite(500, 490, "enemy");
 
     this.enemy.setVelocityX(200);
 
     this.cameras.main.startFollow(this.player.sprite);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    this.cameras.main.zoom = 0.8;
+
+    // this.arr = this.cache.getText("leaderboard");
+
     
+
+
     let style = {
-      font: "18px monospace",
+      font: "24px monospace",
       fill: "#000000",
       padding: { x: 10, y: 10 },
       backgroundColor: "#ffffff"
     };
-
+    
     //Текстовое поле с управлением персонажем
-    this.add.text(16, 16, "Нажимай стрелочки или WASD для того,\nчтобы двигаться и прыгать", style).setScrollFactor(0);
+    //this.add.text(16, 16, "Нажимай стрелочки или WASD для того,\nчтобы двигаться и прыгать", style).setScrollFactor(0);
 
     //Сохранение счёта фруктов в переменной, которая будет доступна во всех методах класса
     this.fruit_score = 0;
@@ -154,9 +185,14 @@ var PlatformerScene = new Phaser.Class ({
       this.hit();
     }
 
+    // Если фрукт падает на шипы, то он уничтожается и появляется новый
+    if (this.physics.overlap(this.coin, this.spikeGroup ) || this.coin.y > this.groundLayer.height) {
+      this.matchCoin();
+    }
+
     if (
       this.player.sprite.y > this.groundLayer.height ||
-      this.physics.world.overlap(this.player.sprite, this.spikes) ||
+      this.physics.world.overlap(this.player.sprite, this.spikeGroup) ||
       this.physics.world.overlap(this.player.sprite, this.enemy)
     ) {
 
@@ -180,8 +216,6 @@ var PlatformerScene = new Phaser.Class ({
       const cam = this.cameras.main;
       cam.shake(100, 0.05);
 
-
-
       //"Заморозить" персонажа, чтобы он остался на экране, пока экран темнеет
       this.player.freeze();
 
@@ -189,9 +223,9 @@ var PlatformerScene = new Phaser.Class ({
       this.physics.world.addCollider(this.enemy, this.groundLayer);
 
       
-        this.add.text(275, 221, 'Game Over!\nPress SPACE to continue.\nYour Fruit Score is: ' + this.fruit_score, 
+        this.add.text(275, 221, 'Fruit Score: ' + this.fruit_score, 
         {
-          font: "18px monospace",
+          font: "24px monospace",
           fill: "#000000",
           padding: { x: 20, y: 20 },
           align: "center",
@@ -226,10 +260,27 @@ var PlatformerScene = new Phaser.Class ({
     }, null, this);
   },
 
-  hit: function() {
+  
+  matchCoin: function() {
     //Смена положения монетки по координатам 'x' и 'y' случайным образом
-    this.coin.x = (this.player.sprite.x < 400) ? Phaser.Math.Between(300, 700) : Phaser.Math.Between(100, 500);
-    this.coin.y = Phaser.Math.Between(100, 400);
+    this.playerPosX = this.player.sprite.x;
+    var itemsX = Array(Phaser.Math.Between(this.playerPosX + 200, this.playerPosX + 450), Phaser.Math.Between(this.playerPosX - 200, this.playerPosX - 450));
+    this.coin.x = itemsX[Math.floor(Math.random()*itemsX.length)];
+    
+    this.playerPosY = this.player.sprite.y;
+    var itemsY = Array(Phaser.Math.Between(this.playerPosY + 128, this.playerPosY + 256), Phaser.Math.Between(this.playerPosY - 128, this.playerPosY - 256));
+    this.coin.y = itemsY[Math.floor(Math.random()*itemsY.length)];
+
+    this.coin.setVelocityY(0);
+
+    // this.playerPosY = this.player.sprite.y;
+    // this.coin.x = Phaser.Math.Between(this.playerPosX + 64, this.playerPosX + 250) || Phaser.Math.Between(this.playerPosX - 64, this.playerPosX - 250);
+    // this.coin.y = Phaser.Math.Between(100, 400);
+  },
+
+  hit: function() {
+    
+    this.matchCoin();
 
     //Увеличить счётчик количества фруктов на 10
     this.fruit_score += 10;
@@ -259,6 +310,7 @@ const config = {
   width: 800,
   height: 600,
   parent: "game-container",
+  
   //pixelArt: false,
   backgroundColor: "#1d212d",
   scene: [ MainMenu, PlatformerScene ],

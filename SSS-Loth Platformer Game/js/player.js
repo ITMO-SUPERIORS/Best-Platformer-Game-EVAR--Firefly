@@ -67,11 +67,8 @@ export default class Player {
     } else if (keys.right.isDown || keys.d.isDown) {
       sprite.setAccelerationX(acceleration);
       sprite.setFlipX(false);
-      // run_anim.setFlipX(false);
     } else {
       sprite.setAccelerationX(0);
-      // run_anim.setAccelerationX(0);
-
     }
 
     if (onGround) {
