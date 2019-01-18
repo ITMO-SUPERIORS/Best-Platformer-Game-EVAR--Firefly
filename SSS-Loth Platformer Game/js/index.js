@@ -1,3 +1,4 @@
+
 import Player from "./player.js";
 
 var MainMenu = new Phaser.Class ({
@@ -10,7 +11,7 @@ var MainMenu = new Phaser.Class ({
   },
   
   preload: function() {
-    this.load.image("TMNT", "../assets/images/TMNT.png");
+    this.load.image("TMNT", "./assets/images/TMNT.png");
   },
 
   create: function() {
@@ -45,34 +46,40 @@ var PlatformerScene = new Phaser.Class ({
   },
 
   preload: function() {
-    this.load.image("player", "../assets/images/hero.png");
-    this.load.image("spike", "../assets/images/lava.png");
-    this.load.image("tiles", "../assets/tilesets/0x72-industrial-tileset-32px-extruded.png");
-    this.load.tilemapTiledJSON("map", "../assets/tilemaps/platformer.json");
-    this.load.image("sky", "../assets/images/sky.png");
-    this.load.image("enemy", "../assets/images/enemy.png");
-    this.load.image("coin", "../assets/images/coin.png");
+    this.load.image("coin", "./assets/images/fruit.png");
+    this.load.image("player", "./assets/images/sprite.png");
+    // this.load.image("spike", "./assets/images/lava.png");
+    this.load.image("tiles", "./assets/tilesets/TileSet-01.png");
+    this.load.tilemapTiledJSON("map", "./assets/tilemaps/Platformer_2.json");
+    this.load.image("sky", "./assets/images/Background.png");
+    this.load.image("enemy", "./assets/images/enemy.png");
+    this.load.spritesheet("run_anim", "./assets/images/sloth_run_2.png", {frameWidth: 99, frameHeight: 105, spacing: 2});
+    this.load.spritesheet("idle_anim", "./assets/images/sloth_idle_2.png", {frameWidth: 99, frameHeight: 105, spacing: 2});
+    this.load.image("jump", "./assets/images/sloth_jump.png");
   },
 
   create: function() {
     this.isPlayerDead = false;
 
     const map = this.make.tilemap({ key: "map" });
-    const tiles = map.addTilesetImage("0x72-industrial-tileset-32px-extruded", "tiles");
-        
+    const tiles = map.addTilesetImage("TileSet-01", "tiles");
+    this.paralax = this.add.image(1000, 500, 'sky');
     //Задний план (изображение)
-    this.add.image(400, 300, 'sky');
-
+    // this.add.image(1000, 500, 'sky');
+    // bg.height = this.height;
+    // bg.width = this.width;
     this.coin = this.physics.add.sprite(Phaser.Math.Between(300, 700), Phaser.Math.Between(100, 400), 'coin');
 
-    map.createDynamicLayer("Background", tiles);
-    this.groundLayer = map.createDynamicLayer("Ground", tiles);
-    map.createDynamicLayer("Foreground", tiles);
+    map.createDynamicLayer("Back", tiles);
+    this.groundLayer = map.createDynamicLayer("Solid", tiles);
+    this.obstacleLayer = map.createDynamicLayer("Obstacles", tiles);
+    map.createDynamicLayer("Front", tiles);
 
     //Поместить игрока в позицию объекта "Spawn Point", созданного в карте.
     //Персонаж сохранён не как переменная, а как часть сцены
     const spawnPoint = map.findObject("Objects", obj => obj.name === "Spawn Point");
     this.player = new Player(this, spawnPoint.x, spawnPoint.y);
+    // this.player = new Player(this, 200, 400);
 
     //Установка столкновения/взаимодействия игрока и слоя уровня ("groundLayer") - берём sprite,
     //а не самого игрока, так как класс Игрока не является сам по себе спрайтом, то есть
@@ -80,25 +87,38 @@ var PlatformerScene = new Phaser.Class ({
     this.groundLayer.setCollisionByProperty({ collides: true });
     this.physics.world.addCollider(this.player.sprite, this.groundLayer);
     this.physics.world.addCollider(this.coin, this.groundLayer);
+    
 
+    this.obstacleLayer.setCollisionByProperty({ isSpike: true });
+    this.physics.world.addCollider(this.player.sprite, this.obstacleLayer);
+
+    this.spikes = this.physics.add.staticGroup();
+    
+    this.obstacleLayer.forEachTile(tile => {
+      if (tile.index === 378 || tile.index === 247 || tile.index === 248){
+        this.spikes.create(tile);
+      }
+    })
+    
     //На карте расставлены шипы. Шип - это только маленькая часть тайла, поэтому, если назначить физику
     //столкновения на шипы, то игрок будет взаимодействовать с ними, находясь над шипами. Поэтому просто
     //заменим тайлы шипов на спрайт шипов/лавы, благодаря чему изменим их размер на подходящий для взаимодействия
-    this.spikeGroup = this.physics.add.staticGroup();
-    this.groundLayer.forEachTile(tile => {
-      if (tile.index === 77) {
-        const spike = this.spikeGroup.create(tile.getCenterX(), tile.getCenterY(), "spike");
+    // var spikeTiles = []
+    // this.spikeGroup = this.physics.add.staticGroup();
+    //   this.obstacleLayer.forEachTile(tile => {
+    //   if (tile.index === 377 || tile.index === 378) {
+    //     const spike = this.spikeGroup.create(tile.getCenterX(), tile.getCenterY());
 
-        //На тайл карте расставлены шипы, развёрнутые в разные стороны, поэтому повернём спрайт нужной стороной
-        //при расстановке новых спрайтов шипов/лавы
-        spike.rotation = tile.rotation;
-        if (spike.angle === 0) spike.body.setSize(32, 6).setOffset(0, 12);
-        else if (spike.angle === -90) spike.body.setSize(6, 32).setOffset(12, 0);
-        else if (spike.angle === 90) spike.body.setSize(6, 32).setOffset(12, 0);
+    // //     //На тайл карте расставлены шипы, развёрнутые в разные стороны, поэтому повернём спрайт нужной стороной
+    // //     //при расстановке новых спрайтов шипов/лавы
+    // //     spike.rotation = tile.rotation;
+    // //     if (spike.angle === 0) spike.body.setSize(32, 6).setOffset(0, 12);
+    // //     else if (spike.angle === -90) spike.body.setSize(6, 32).setOffset(12, 0);
+    // //     else if (spike.angle === 90) spike.body.setSize(6, 32).setOffset(12, 0);
 
-        this.groundLayer.removeTileAt(tile.x, tile.y);
-      }
-    });
+    // //     this.groundLayer.removeTileAt(tile.x, tile.y);
+    //   }
+    // });
 
     this.enemy = this.physics.add.sprite(350, 490, "enemy");
 
@@ -136,7 +156,7 @@ var PlatformerScene = new Phaser.Class ({
 
     if (
       this.player.sprite.y > this.groundLayer.height ||
-      this.physics.world.overlap(this.player.sprite, this.spikeGroup) ||
+      this.physics.world.overlap(this.player.sprite, this.spikes) ||
       this.physics.world.overlap(this.player.sprite, this.enemy)
     ) {
 
@@ -155,17 +175,17 @@ var PlatformerScene = new Phaser.Class ({
         //Вернуть игрока к начальному оригинальному масштабу
         yoyo: true,
       });
-
       this.player.sprite.setTint(0xff0000);
 
       const cam = this.cameras.main;
       cam.shake(100, 0.05);
 
+
+
       //"Заморозить" персонажа, чтобы он остался на экране, пока экран темнеет
       this.player.freeze();
 
       this.enemy.setVelocityX(0);
-
       this.physics.world.addCollider(this.enemy, this.groundLayer);
 
       
