@@ -41,10 +41,10 @@ export default class Player {
   }
 
   create() {
-    this.doubleJump = false;
+    // this.doubleJump = false;
     this.onWall = false;
     this.canJump = true;
-    this.canDoubleJump = false;
+    // this.canDoubleJump = false;
   }
 
   freeze() {
@@ -85,15 +85,15 @@ export default class Player {
     }
     //Если игрок может прыгнуть в воздухе (совершить двойной прыжок) и кнопка прыжка 
     //не нажата (была отпущена), то игроку можно прыгнуть в воздухе
-    if (this.doubleJump && keys.up.isUp) {
-      this.canDoubleJump = true;
-    }
+    // if (this.doubleJump && keys.up.isUp) {
+    //   this.canDoubleJump = true;
+    // }
 
     //Игрок может прыгать только если он стоит на земле
     if (onGround && this.canJump && (keys.up.isDown || keys.w.isDown)) {
       sprite.setVelocityY(-700);
       this.canJump = false;
-      this.doubleJump = true;
+      // this.doubleJump = true;
     }
     else if (this.onWall && (keys.up.isDown || keys.w.isDown)) {
       sprite.setVelocityY(-700);
@@ -105,19 +105,19 @@ export default class Player {
         // sprite.setFlipX(true);
         sprite.setVelocityX(-200);
       }
-      this.doubleJump = true;
+      // this.doubleJump = true;
       this.onWall = false;
     }
     //Игрок может прыгать в воздухе только если он не стоит на земле и не висит на стене
-    else if (this.doubleJump && this.canDoubleJump && (keys.up.isDown || keys.w.isDown)) {
-      sprite.setVelocityY(-700);
-      this.doubleJump = false;
-      this.canDoubleJump = false;
-    }
+    //  else if (/*this.doubleJump && this.canDoubleJump && */(keys.up.isDown || keys.w.isDown)) {
+    //    sprite.setVelocityY(-700);
+    // //   // this.doubleJump = false;
+    // //   // this.canDoubleJump = false;
+    //  }
     //Если игрок касается стен, но не касается пола, значит он зацепился за стену
     if ((sprite.body.blocked.left || sprite.body.blocked.right) && !onGround && (sprite.body.velocity.y >= 0)) {
       sprite.body.gravity.y = 0;
-      sprite.setVelocityY(100);
+      sprite.setVelocityY(150);
       this.onWall = true;
     }
     else {

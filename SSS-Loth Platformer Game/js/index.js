@@ -268,7 +268,7 @@ var PlatformerScene = new Phaser.Class ({
     this.coin.x = itemsX[Math.floor(Math.random()*itemsX.length)];
     
     this.playerPosY = this.player.sprite.y;
-    var itemsY = Array(Phaser.Math.Between(this.playerPosY + 128, this.playerPosY + 256), Phaser.Math.Between(this.playerPosY - 128, this.playerPosY - 256));
+    var itemsY = Array(Phaser.Math.Between(this.playerPosY + 128, this.playerPosY + 256), Phaser.Math.Between(this.playerPosY - 128, this.playerPosY - 360));
     this.coin.y = itemsY[Math.floor(Math.random()*itemsY.length)];
 
     this.coin.setVelocityY(0);
