@@ -1,4 +1,4 @@
-# Игра «Mad Sloth. Awesome lime gathering»
+# Игра «Mad Sloth: Awesome lime gathering»
 
 Университет ИТМО,
 Группа P3471,
