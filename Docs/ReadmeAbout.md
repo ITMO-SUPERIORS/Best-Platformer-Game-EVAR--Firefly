@@ -17,4 +17,4 @@
 
 **[Описание игры](../README.md)**
 
-**[Как запустить игру](Docs/ReadmeInstall.md)**
+**[Как запустить игру](ReadmeInstall.md)**
