@@ -1,0 +1,28 @@
+{
+  "name": "sloth",
+  "version": "1.2.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ITMO-SUPERIORS/Mad_Sloth_Awesome_Lime_Gathering.git"
+  },
+  "keywords": [
+    "platformer",
+    "game",
+    "sloth"
+  ],
+  "author": "superiors",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ITMO-SUPERIORS/Mad_Sloth_Awesome_Lime_Gathering/issues"
+  },
+  "homepage": "https://github.com/ITMO-SUPERIORS/Mad_Sloth_Awesome_Lime_Gathering#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
